@@ -359,11 +359,11 @@
     const openEditLimeSurvey = function(activityData) {
 		const activity = getActivityFromId(activityData[ACTIVITY_DATA_ID_KEY]);
 		if (activity != null && activity.survey_id != null) {
-			Simva.setSurveyOwner(activity.activity_id, (error, result) => {
+			Simva.setSurveyOwner(activity.survey_id, (error, result) => {
                 if (error) {
                     $.toast({
                         heading: "<%- t('activities.limeSurvey_activity.edit_survey.error_toast.heading', { ns : 'activities' }) %>",
-                        text: error.responseJSON ? error.responseJSON.message : error.message || error,
+                        text: Utils.getErrorMessage(error),
                         position: 'top-right',
                         icon: 'error',
                         stack: false

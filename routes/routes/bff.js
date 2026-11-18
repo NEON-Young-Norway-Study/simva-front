@@ -1105,18 +1105,20 @@ module.exports = function(auth, redirectToLogin, config){
     });
 
     // Set the owner of a survey
-    router.patch('/limesurvey/surveys/owner', auth, redirectToLogin, async (req, res, next) => {
-        // the survey is identified by the body: the route itself declares no path parameter
-        const surveyId = req.query.surveyid ?? req.body.survey_id ?? req.body.surveyId;
+    router.patch('/limesurvey/surveys/:surveyid/owner', auth, redirectToLogin, async (req, res, next) => {
+        const surveyId = req.params["surveyid"];
         try {
             let result = await SimvaAsync.setSurveyOwner(surveyId, req.session.id);
             (await xasujs.trace(
                 xasujs.tracker().ALL.VERBS.ACTIVITYSTREAMSVOCABULARYPROFILE_UPDATED,
                 xasujs.getSimletType(),
-                `/limesurvey/surveys/${surveyId ? surveyId + '/' : ''}owner`,
+                `/limesurvey/surveys/${surveyId}/owner`,
                 userClientsListManager.getJWT(req.session.id)
             )).withResultExtensions(req.body).send();
-            res.status(200).send(result);
+            // The backend answers this PATCH with 204 No Content, so send a JSON
+            // body here: the frontend requests dataType 'json' and jQuery fails
+            // with a parser error when the response body is empty.
+            res.status(200).send(result || { message: 'Survey owner updated' });
         } catch(error) {
             next(error.response?.data || error);
         }

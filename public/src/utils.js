@@ -478,5 +478,27 @@ var Utils = {
 	 */
 	trimString: function(string) {
 		return string.replace(/^\s+|\s+$/g, '');
+	},
+
+	/**
+	 * Extract a readable message from a jQuery AJAX error (jqXHR).
+	 * The response body and its message are not always strings, so they are
+	 * normalized here to avoid displaying "[object Object]" in error toasts.
+	 * @param {object|string} error - error passed to the AJAX callback
+	 * @returns {string} - human readable error message
+	 */
+	getErrorMessage: function(error) {
+		const body = error && error.responseJSON;
+		let message = (body && (body.message || body.error))
+			|| (error && error.message)
+			|| (error && error.statusText)
+			|| error;
+
+		if (message && typeof message === 'object') {
+			message = message.message || JSON.stringify(message);
+			if (message === '{}' || message === '[]') message = null;
+		}
+
+		return message ? String(message) : 'Unknown error';
 	}
 }
